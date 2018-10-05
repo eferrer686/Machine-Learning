@@ -1,15 +1,20 @@
 import os
+
 #Get Local Path
-localPath = os.getcwd()
+raw=""
+localPath = str(os.getcwd())
+
+print(localPath)
 #Find data ending in txt
 for file in os.listdir(localPath):
     if file.endswith(".txt"):
+        print(os.path.join(localPath, file))
         raw = os.path.join(localPath, file)
 
 #Read File
 lines = open(raw, 'r')
-newLines = open("temp.csv","w+")
 
+newLines = open("temp.csv","w+")
 #Quitar lineas sin datos o "Head"
 cont = 0
 for line in lines:
