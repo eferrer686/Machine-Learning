@@ -65,9 +65,16 @@ loss = tf.reduce_mean(tf.square(y_target - output))
 optimizer = tf.train.GradientDescentOptimizer(0.005)
 train_step = optimizer.minimize(loss)
 
+#placeholder for tensorBoard
+placeholder1 = tf.placeholder(tf.float32, name='uno')
+sum1 = tf.summary.scalar('uno',placeholder1)
+
+
+
 
 batchSize = 50
 with tf.Session() as sess:
+   
     # initialize variables
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -75,12 +82,13 @@ with tf.Session() as sess:
     train_loss = []
     test_loss = []
     
-    for i in range(len(x_train)):
+    for i in range(30):
 
         random_index = np.random.choice(len(x_train), size= batchSize)
         
         random_x = x_train[random_index]
         random_y = np.transpose([y_train[random_index]])
+        
         sess.run(train_step, feed_dict={x_data:random_x,y_target: random_y})
         
         tempTrainLoss = sess.run(loss, feed_dict={x_data: random_x,y_target: random_y})
@@ -90,13 +98,29 @@ with tf.Session() as sess:
         print(i, str([tempTrainLoss, tempTestLoss]))
         
         train_loss.append(sess.run(tf.sqrt(tempTrainLoss)))
-        test_loss.append(sess.run(tf.sqrt(tempTestLoss)))        
+        test_loss.append(sess.run(tf.sqrt(tempTestLoss)))  
+    
+    #SessGraph
+    writer = tf.summary.FileWriter('./graphs', sess.graph)
+
+    #summaryTrain = tf.summary.scalar('TrainScalar', train_loss)
+    #summaryTest = tf.summary.scalar('TestScalar', test_loss)
+    exsummary = sess.run(sum1, placeholder1, feed_dict={tempTrainLoss})
+
+    # merge summaries
+    merged = tf.summary.merge_all()
+    summary = sess.run(merged)
+    #writer
+    writer.add_summary(summary)
+    writer.flush()       
+
+
+    
+ 
         
-        #print(random_y)
-        #random_y = 
 
 
-# # https://pastebin.com/HiLzqWsN
+    
 
 
 
