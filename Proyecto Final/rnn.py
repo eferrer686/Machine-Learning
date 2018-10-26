@@ -1,48 +1,64 @@
 import tensorflow as tf
 
-class RNN(object):
-    
-    def __init__ (self, input, hidden, output):
-        self.input_nodes = input
-        self.hidden_nodes = hidden
-        self.output_nodes = output
+#Setup of RNN
+class Brain(object):
+    def __init__(self,nodesInput,nodesHidden,nodesOutput):
+        self.inputs = tf.placeholder(shape=[None,1],dtype=tf.float32)
 
-       #Create random tensor weighs
-        self.weights_ih = tf.random_normal([self.hidden_nodes, self.input_nodes])
-        self.weights_ho = tf.random_normal([self.output_nodes, self.hidden_nodes])
+        self.W1 = tf.Variable(tf.random_normal(shape=[nodesInput,nodesHidden]))
+        self.b1 = tf.Variable(tf.random_normal(shape=[nodesHidden]))
+        self.hidden_1 = tf.nn.sigmoid(tf.add(tf.matmul(self.inputs,self.W1),self.b1))
+
+        self.W2 = tf.Variable(tf.random_normal(shape=[nodesHidden,nodesOutput]))
+        self.b2 = tf.Variable(tf.random_normal(shape=[nodesOutput]))
+        self.output = tf.nn.sigmoid(tf.add(tf.matmul(self.hidden_1,self.W2),self.b2))
+
+        self.sess = tf.Session()
+
+        #Inicializar variables y pesos
+        self.init = tf.global_variables_initializer()
+        self.sess.run(self.init)
+
+        self.mutateTensor = tf.placeholder(dtype=tf.float32)
+        self.rW = tf.Variable(tf.random_uniform(tf.TensorShape(self.mutateTensor),0,0.5),validate_shape=False)
+        self.newW = tf.multiply(self.mutateTensor,self.rW)
+        self.mutate = tf.assign(self.mutateTensor,self.newW)
+
+    def predict(self,input):
+        predict = self.sess.run(self.output,feed_dict={self.inputs:input})
+        return predict
+
+    def mutate(self,randomRate = 0.5):
+        rW1 = tf.Variable(tf.random_uniform(self.W1.shape,0,0.5))
+        self.W1 = tf.multiply(self.W1,rW1)
+
+        rW2 = tf.Variable(tf.random_uniform(self.W2.shape,0,0.5))
+        self.W2 = tf.multiply(self.W2,rW2)
         
-        #random bias tensor
-        self.bias_h = tf.random_normal([self.hidden_nodes, 1])
-        self.bias_o = tf.random_normal([self.output_nodes, 1])
+        rB1 = tf.Variable(tf.random_uniform(self.b1.shape,0,0.5))
+        self.b1 = tf.multiply(self.b1,rB1)
+        
+        rB2 = tf.Variable(tf.random_uniform(self.b2.shape,0,0.5))
+        self.b2 = tf.multiply(self.b2,rB2)
 
-    def predict(self, input_array):
-      
-      # Generating the Hidden Outputs
-      inputs = tf.Variable(input_array)
-      hidden = tf.multiply(self.weights_ih,inputs)
-
-      
-      hidden = tf.add(hidden,self.bias_h)
-      # activation function!
-      hidden = tf.sigmoid(hidden)
-      
-      #console.log([inputs,hidden,self.weights_ih,self.weights_ho])
-      
-  
-
-      # Generating the output's output!
-      output = tf.multiply(tf.transpose(self.weights_ho),hidden)
-      output = tf.add(output,self.bias_o)
-      output = tf.sigmoid(output)
-  
-      # Sending back to the caller!
-      return output
-    
-
-brain = RNN(2,2,2)
-init = tf.global_variables_initializer()
-sess = tf.Session()
-sess.run(init)
+        self.sess.run(mutate,feed_dict={mutateTensor: self.W1})
 
 
-print(type(brain.predict([0.5,0.5]).eval(sess)))
+#Establecer # de nodos en las capas
+brain = Brain(1,5,1)
+
+#Prediccion sin ajuste
+array = brain.predict([[0.5]])
+print(array)
+
+#Prediccion sin ajuste, debe ser el mismo valor puesto que no se inicializa otra vez los pesos
+array = brain.predict([[0.5]])
+print(array)
+
+#Mutar pesos
+brain.mutate()
+
+#Prediccion con nuevos pesos, debe ser diferente puesto que los pesos son modificados
+array = brain.predict([[0.5]])
+print(array)
+
