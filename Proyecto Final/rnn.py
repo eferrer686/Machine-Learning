@@ -2,7 +2,7 @@ import tensorflow as tf
 
 #Setup of RNN
 class Brain(object):
-    def __init__(self,nodesInput,nodesHidden,nodesOutput):
+    def __init__(self,nodesInput,nodesHidden,nodesOutput,mutateRate=0.5):
         self.inputs = tf.placeholder(shape=[None,1],dtype=tf.float32)
 
         self.W1 = tf.Variable(tf.random_normal(shape=[nodesInput,nodesHidden]))
@@ -15,22 +15,22 @@ class Brain(object):
 
         #Mutaciones de red Neural
         #Mutar W1
-        self.rW = tf.Variable(tf.random_uniform(self.W1.shape,0,0.5),validate_shape=False)
+        self.rW = tf.Variable(tf.random_uniform(self.W1.shape,0,mutateRate),validate_shape=False)
         self.newW = tf.multiply(self.W1,self.rW)
         self.mutateW1 = tf.assign(self.W1,self.newW)
 
         #Mutar W2
-        self.rW = tf.Variable(tf.random_uniform(self.W2.shape,0,0.5),validate_shape=False)
+        self.rW = tf.Variable(tf.random_uniform(self.W2.shape,0,mutateRate),validate_shape=False)
         self.newW = tf.multiply(self.W2,self.rW)
         self.mutateW2 = tf.assign(self.W2,self.newW)
 
         #Mutar b1
-        self.rW = tf.Variable(tf.random_uniform(self.b1.shape,0,0.5),validate_shape=False)
+        self.rW = tf.Variable(tf.random_uniform(self.b1.shape,0,mutateRate),validate_shape=False)
         self.newW = tf.multiply(self.b1,self.rW)
         self.mutateb1 = tf.assign(self.b1,self.newW)
 
         #Mutar b2
-        self.rW = tf.Variable(tf.random_uniform(self.b2.shape,0,0.5),validate_shape=False)
+        self.rW = tf.Variable(tf.random_uniform(self.b2.shape,0,mutateRate),validate_shape=False)
         self.newW = tf.multiply(self.b2,self.rW)
         self.mutateb2 = tf.assign(self.b2,self.newW)
 
@@ -54,11 +54,13 @@ class Brain(object):
 
 
 #Establecer # de nodos en las capas
-brain = Brain(1,5,1)
+brain = Brain(1,5,2,0.8)
 
 #Prediccion sin ajuste
-array = brain.predict([[0.5]])
-print(array)
+for n in range(10):
+        
+    array = brain.predict([[0.5]])
+    print(array)
 
 #Mutar pesos
 brain.mutate()
